@@ -1,0 +1,7 @@
+[package]
+name = "technical-book-template"
+version = "1.0.0"
+entrypoint = "main.typ"
+authors = ["Junxiao Guo"]
+license = "MIT"
+description = "A sophisticated Typst template for technical books and guides"
