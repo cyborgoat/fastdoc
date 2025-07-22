@@ -152,7 +152,7 @@
 #let chapter-core-concepts() = [
   = Core Concepts
 
-  This chapter introduces the fundamental concepts that form the foundation of our technical approach.
+  This chapter covers fundamental programming concepts and design patterns essential for effective software development.
 
   == Design Patterns
 

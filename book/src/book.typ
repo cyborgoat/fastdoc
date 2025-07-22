@@ -101,6 +101,9 @@
     first-line-indent: 1.2em,
   )
 
+  // Enable heading numbering
+  set heading(numbering: "1.1.1.1")
+
   // Heading styles with reduced contrast and tighter spacing
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
@@ -112,11 +115,10 @@
     )
     block(above: 1.2em, below: 1em)[
       #if it.numbering != none {
-        text(size: 0.65em, weight: "normal", fill: gray)[Chapter #counter(heading).display()]
-        linebreak()
-        v(-0.2em)
+        text(weight: "bold")[Chapter #counter(heading).display(): #it.body]
+      } else {
+        text(weight: "bold")[#it.body]
       }
-      #it.body
       #v(0.3em)
       #line(length: 100%, stroke: 1.5pt + rgb(accent-color).lighten(40%))
     ]
@@ -130,7 +132,10 @@
       fill: rgb(accent-color).lighten(30%),
     )
     block(above: 1em, below: 0.7em)[
-      #it
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
       #v(0.2em)
       #line(length: 25%, stroke: 0.8pt + rgb(accent-color).lighten(50%))
     ]
@@ -143,7 +148,12 @@
       weight: "semibold",
       fill: rgb(accent-color).lighten(10%),
     )
-    block(above: 0.8em, below: 0.5em)[#it]
+    block(above: 0.8em, below: 0.5em)[
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
+    ]
   }
 
   show heading.where(level: 4): it => {
@@ -153,7 +163,12 @@
       weight: "semibold",
       style: "italic",
     )
-    block(above: 1em, below: 0.6em)[#it]
+    block(above: 1em, below: 0.6em)[
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
+    ]
   }
 
   // Code styling - more compact

@@ -1,11 +1,12 @@
 #import "src/book.typ": *
 #import "src/chapter1.typ": *
 #import "src/chapter2.typ": *
+#import "src/chapter3.typ": *
 #import "src/book-cover.typ": *
 
 // Book cover page
 #book-cover(
-  title: "Modern Software Development Guide",
+  title: "我是个惊喜",
   subtitle: "A Comprehensive Technical Manual",
   authors: ("Junxiao Guo", "Technical Expert"),
   version: "1.0.0",
@@ -36,6 +37,7 @@
 #chapter-introduction()
 #chapter-getting-started()
 #chapter-core-concepts()
+#chapter-mathematical-foundations()
 #chapter-advanced-practices()
 
 // Additional chapters can be added here
