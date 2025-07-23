@@ -34,11 +34,9 @@
 )
 
 // Include content chapters
-#chapter-introduction()
-#chapter-getting-started()
-#chapter-core-concepts()
-#chapter-mathematical-foundations()
-#chapter-advanced-practices()
+#include "src/chapter1.typ"
+#include "src/chapter2.typ"
+#include "src/chapter3.typ"
 
 // Additional chapters can be added here
 = Advanced Topics
