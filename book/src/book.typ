@@ -22,7 +22,7 @@
     below: (chapter: 1.5em, section: 1em, subsection: 0.8em, h4: 0.6em),
   ),
   block-spacing: (above: 0.8em, below: 0.8em),
-  list-spacing: 0.4em,
+  list-spacing: 0.8em,
   
   // Sizes
   heading-font-size: (
@@ -382,13 +382,7 @@
         v(0.3em)
         align(center)[
           #text(size: 0.85em, weight: "semibold", fill: config.gray-dark)[
-            #it.supplement
-            #if it.numbering != none [
-              #[ ]#it.counter.display(it.numbering)
-            ]
-            #if it.caption != none [
-              #[: ]#it.caption
-            ]
+            #it.caption
           ]
         ]
       }
