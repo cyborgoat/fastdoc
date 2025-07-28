@@ -1,264 +1,92 @@
 #import "lib.typ": *
 
-// Main book template function
-#let book(
-  title: "",
-  subtitle: "",
-  authors: (),
-  version: "",
-  date: datetime.today(),
-  publisher: "",
-  isbn: "",
-  cover-image: none,
-  accent-color: "#2563eb",
+// Default configuration values
+#let default-config = (
+  // Typography
   font: "New Computer Modern",
-  body-font: "New Computer Modern",
   mono-font: ("SF Mono", "Monaco", "Consolas", "Liberation Mono", "Courier New"),
-  paper: "a4",
-  margin: (x: 2cm, y: 1.5cm),
-  line-height: 1.1,
   font-size: 10pt,
+  line-height: 1.1,
+  
+  // Colors
+  accent-color: "#385fb4ff",
+  text-color: black,
+  gray-light: rgb("#f8f9fa"),
+  gray-medium: rgb("#e9ecef"),
+  gray-dark: gray.darken(20%),
+  chapter-underline-color: "#385fb4ff",
+  
+  // Spacing
+  heading-spacing: (
+    above: (chapter: 2em, section: 1.5em, subsection: 1.2em, h4: 1em),
+    below: (chapter: 1.5em, section: 1em, subsection: 0.8em, h4: 0.6em),
+  ),
+  block-spacing: (above: 0.8em, below: 0.8em),
+  list-spacing: 0.4em,
+  
+  // Sizes
   heading-font-size: (
     part: 20pt,
     chapter: 16pt,
     section: 13pt,
     subsection: 11pt,
   ),
-  show-outline: true,
-  show-bibliography: true,
-  body,
-) = {
+  
+  // Layout
+  paper: "a4",
+  margin: (x: 2cm, y: 1.5cm),
+  title-margin: (x: 2cm, y: 1cm),
+  
+  // Code styling
+  code-fill: rgb("#f8f9fa"),
+  code-stroke: rgb("#dee2e6"),
+  code-inset: (inline: (x: 4pt, y: 2pt), block: 12pt),
+  code-radius: (inline: 3pt, block: 6pt),
+  code-size: 0.85em,
+)
 
-  // Document metadata
-  set document(
-    title: title,
-    author: authors,
-    date: date,
-  )
+// Helper functions for page components
+#let create_header() = context {
+  if counter(page).get().first() > 1 {
+    let current-heading = query(selector(heading.where(level: 1)).before(here())).last()
+    align(center)[
+      #text(size: 8pt, style: "italic", fill: gray.darken(20%))[
+        #current-heading.body
+      ]
+    ]
+  }
+}
 
-  // Page setup
-  set page(
-    paper: paper,
-    margin: margin,
-    numbering: "1",
-    header: context {
-      if counter(page).get().first() > 1 {
-        let current-heading = query(selector(heading.where(level: 1)).before(here())).last()
-        align(center)[
-          #text(size: 8pt, style: "italic", fill: gray.darken(20%))[
-            #current-heading.body
-          ]
-        ]
-      }
-    },
-    footer: context {
-      if counter(page).get().first() > 1 {
-        // Add a line separator at the top of footer
-        line(length: 100%, stroke: 0.5pt + gray.lighten(40%))
-        v(0.3em)
-        
-        let current-chapter = query(selector(heading.where(level: 1)).before(here())).last()
-        let current-section = query(selector(heading.where(level: 2)).before(here())).last()
-        
-        grid(
-          columns: (1fr, auto, 1fr),
-          align: (left, center, right),
-          column-gutter: 1em,
-          
-          // Left: Chapter name
-          text(size: 8pt, fill: gray.darken(20%))[
-            #if current-chapter != none [
-              #current-chapter.body
-            ]
-          ],
-          
-          // Center: Page number
-          text(size: 8pt, fill: gray.darken(20%))[
-            #counter(page).display("1")
-          ],
-          
-          // Right: Section name
-          text(size: 8pt, fill: gray.darken(20%))[
-            #if current-section != none [
-              #current-section.body
-            ]
-          ]
-        )
-      }
-    }
-  )
-
-  // Typography settings
-  set text(
-    font: body-font,
-    size: font-size,
-    lang: "en",
-  )
-
-  set par(
-    justify: true,
-    leading: line-height * 1em,
-    first-line-indent: 1.2em,
-  )
-
-  // Enable heading numbering
-  set heading(numbering: "1.1.1.1")
-
-  // Heading styles with reduced contrast and tighter spacing
-  show heading.where(level: 1): it => {
-    pagebreak(weak: true)
-    set text(
-      font: font,
-      size: heading-font-size.chapter,
-      weight: "bold",
-      fill: rgb(accent-color).lighten(20%),
+#let create_footer() = context {
+  if counter(page).get().first() > 1 {
+    line(length: 100%, stroke: 0.5pt + gray.lighten(40%))
+    v(0.3em)
+    
+    let current-chapter = query(selector(heading.where(level: 1)).before(here())).last()
+    let current-section = query(selector(heading.where(level: 2)).before(here())).last()
+    
+    grid(
+      columns: (1fr, auto, 1fr),
+      align: (left, center, right),
+      column-gutter: 1em,
+      
+      text(size: 8pt, fill: gray.darken(20%))[
+        #if current-chapter != none [#current-chapter.body]
+      ],
+      text(size: 8pt, fill: gray.darken(20%))[
+        #counter(page).display("1")
+      ],
+      text(size: 8pt, fill: gray.darken(20%))[
+        #if current-section != none [#current-section.body]
+      ]
     )
-    block(above: 1.2em, below: 1em)[
-      #if it.numbering != none {
-        text(weight: "bold")[Chapter #counter(heading).display(): #it.body]
-      } else {
-        text(weight: "bold")[#it.body]
-      }
-      #v(0.3em)
-      #line(length: 100%, stroke: 1.5pt + rgb(accent-color).lighten(40%))
-    ]
   }
+}
 
-  show heading.where(level: 2): it => {
-    set text(
-      font: font,
-      size: heading-font-size.section,
-      weight: "semibold",
-      fill: rgb(accent-color).lighten(30%),
-    )
-    block(above: 1em, below: 0.7em)[
-      #if it.numbering != none {
-        counter(heading).display() + " "
-      }
-      #it.body
-      #v(0.2em)
-      #line(length: 25%, stroke: 0.8pt + rgb(accent-color).lighten(50%))
-    ]
-  }
-
-  show heading.where(level: 3): it => {
-    set text(
-      font: font,
-      size: heading-font-size.subsection,
-      weight: "semibold",
-      fill: rgb(accent-color).lighten(10%),
-    )
-    block(above: 0.8em, below: 0.5em)[
-      #if it.numbering != none {
-        counter(heading).display() + " "
-      }
-      #it.body
-    ]
-  }
-
-  show heading.where(level: 4): it => {
-    set text(
-      font: font,
-      size: font-size * 1.1,
-      weight: "semibold",
-      style: "italic",
-    )
-    block(above: 1em, below: 0.6em)[
-      #if it.numbering != none {
-        counter(heading).display() + " "
-      }
-      #it.body
-    ]
-  }
-
-  // Code styling - more compact
-  show raw.where(block: false): it => {
-    box(
-      fill: rgb("#f1f5f9"),
-      inset: (x: 3pt, y: 1pt),
-      outset: (y: 2pt),
-      radius: 2pt,
-    )[
-      #text(font: mono-font, size: 0.85em)[#it]
-    ]
-  }
-
-  show raw.where(block: true): it => {
-    block(
-      fill: rgb("#f8f9fa"),
-      stroke: 0.5pt + rgb("#e9ecef"),
-      radius: 4pt,
-      inset: 10pt,
-      width: 100%,
-      above: 0.8em,
-      below: 0.8em,
-    )[
-      #set text(font: mono-font, size: 0.85em)
-      #it
-    ]
-  }
-
-  // Links styling
-  show link: it => {
-    set text(fill: rgb(accent-color).lighten(10%))
-    underline(it)
-  }
-
-  // List styling with tighter spacing
-  set list(indent: 1em, spacing: 0.4em)
-  set enum(indent: 1em, spacing: 0.4em)
-
-  // Quote styling - improved with better visual hierarchy
-  show quote: it => {
-    block(
-      fill: rgb("#f8f9fa"),
-      stroke: (left: 4pt + rgb(accent-color)),
-      radius: (right: 4pt),
-      inset: (x: 12pt, y: 8pt),
-    )[
-      #set text(style: "italic")
-      #it
-    ]
-  }
-
-  // Figure styling with more compact spacing
-  show figure: it => {
-    block(above: 1em, below: 1em)[
-      #align(center)[#it.body]
-      #if it.caption != none {
-        v(0.3em)
-        align(center)[
-          #text(size: 0.85em, weight: "semibold", fill: gray.darken(20%))[
-            #it.supplement
-            #if it.numbering != none [
-              #[ ]#it.counter.display(it.numbering)
-            ]
-            #if it.caption != none [
-              #[: ]#it.caption
-            ]
-          ]
-        ]
-      }
-    ]
-  }
-
-  // Table styling with tighter spacing
-  show table: it => {
-    block(above: 1em, below: 1em)[
-      #align(center)[#it]
-    ]
-  }
-
-  // Bibliography styling
-  show bibliography: it => {
-    pagebreak(weak: true)
-    set heading(numbering: none)
-    it
-  }
-
-  // Title page
+// Title page creation
+#let create_title_page(title, subtitle, authors, version, date, publisher, isbn, cover-image, config) = {
   page(
-    margin: (x: 2cm, y: 3cm),
+    margin: config.title-margin,
     header: none,
     footer: none,
     numbering: none,
@@ -272,16 +100,16 @@
       }
       
       #text(
-        font: font,
+        font: config.font,
         size: 32pt,
         weight: "bold",
-        fill: rgb(accent-color),
+        fill: rgb(config.accent-color),
       )[#title]
       
       #if subtitle != "" {
         v(0.5cm)
         text(
-          font: font,
+          font: config.font,
           size: 18pt,
           style: "italic",
         )[#subtitle]
@@ -314,8 +142,10 @@
       }
     ]
   ]
+}
 
-  // Copyright page
+// Copyright page creation
+#let create_copyright_page(authors, date, isbn) = {
   page(
     header: none,
     footer: none,
@@ -340,26 +170,254 @@
       ]
     ]
   ]
+}
 
-  // Table of contents
-  if show-outline {
-    page(
-      header: none,
-      footer: context {
+// Table of contents creation
+#let create_outline() = {
+  page(
+    header: none,
+    footer: context {
+      align(center)[
+        #text(size: 9pt)[
+          #counter(page).display("i")
+        ]
+      ]
+    },
+    numbering: "i",
+  )[
+    #outline(
+      title: [Table of Contents],
+      depth: 3,
+      indent: 1em,
+    )
+  ]
+}
+
+// Main book template function
+#let book(
+  title: "",
+  subtitle: "",
+  authors: (),
+  version: "",
+  date: datetime.today(),
+  publisher: "",
+  isbn: "",
+  cover-image: none,
+  accent-color: default-config.accent-color,
+  chapter-underline-color: default-config.chapter-underline-color,
+  font: default-config.font,
+  body-font: default-config.font,
+  mono-font: default-config.mono-font,
+  paper: default-config.paper,
+  margin: default-config.margin,
+  line-height: default-config.line-height,
+  font-size: default-config.font-size,
+  heading-font-size: default-config.heading-font-size,
+  show-outline: true,
+  show-bibliography: true,
+  body,
+) = {
+  // Merge user config with defaults
+  let config = default-config
+  config.accent-color = accent-color
+  config.chapter-underline-color = chapter-underline-color
+  config.font = font
+  config.body-font = body-font
+  config.mono-font = mono-font
+  config.paper = paper
+  config.margin = margin
+  config.line-height = line-height
+  config.font-size = font-size
+  config.heading-font-size = heading-font-size
+
+  // Document metadata
+  set document(title: title, author: authors, date: date)
+
+  // Page setup with header and footer
+  set page(
+    paper: config.paper,
+    margin: config.margin,
+    numbering: "1",
+    header: create_header(),
+    footer: create_footer(),
+  )
+
+  // Typography settings
+  set text(
+    font: config.body-font,
+    size: config.font-size,
+    lang: "en",
+  )
+
+  set par(
+    justify: true,
+    leading: config.line-height * 1em,
+    first-line-indent: 1.2em,
+  )
+
+  // Configure headings
+  set heading(numbering: "1.1.1.1")
+  
+  // Apply heading styles directly
+  let accent = rgb(config.accent-color)
+  let underline-color = rgb(config.chapter-underline-color)
+  let spacing = config.heading-spacing
+  let sizes = config.heading-font-size
+  
+  show heading.where(level: 1): it => {
+    pagebreak(weak: true)
+    set text(
+      font: config.font,
+      size: sizes.chapter,
+      weight: "bold",
+      fill: accent.darken(25%),
+    )
+    block(above: spacing.above.chapter, below: spacing.below.chapter)[
+      #if it.numbering != none {
+        text(weight: "bold")[Chapter #counter(heading).display(): #it.body]
+      } else {
+        text(weight: "bold")[#it.body]
+      }
+      #v(0.4em)
+      #line(length: 100%, stroke: 2.5pt + underline-color.lighten(10%))
+    ]
+  }
+
+  show heading.where(level: 2): it => {
+    set text(
+      font: config.font,
+      size: sizes.section,
+      weight: "semibold",
+      fill: accent.darken(15%),
+    )
+    block(above: spacing.above.section, below: spacing.below.section)[
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
+    ]
+  }
+
+  show heading.where(level: 3): it => {
+    set text(
+      font: config.font,
+      size: sizes.subsection,
+      weight: "semibold",
+      fill: accent.darken(10%),
+    )
+    block(above: spacing.above.subsection, below: spacing.below.subsection)[
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
+    ]
+  }
+
+  show heading.where(level: 4): it => {
+    set text(
+      font: config.font,
+      size: config.font-size * 1.1,
+      weight: "semibold",
+      style: "italic",
+      fill: accent.darken(5%),
+    )
+    block(above: spacing.above.h4, below: spacing.below.h4)[
+      #if it.numbering != none {
+        counter(heading).display() + " "
+      }
+      #it.body
+    ]
+  }
+  
+  // Apply code styles directly
+  show raw.where(block: false): it => {
+    box(
+      fill: config.code-fill,
+      stroke: 1pt + config.code-stroke,
+      inset: config.code-inset.inline,
+      outset: (y: 2pt),
+      radius: config.code-radius.inline,
+    )[
+      #text(font: config.mono-font, size: config.code-size, fill: rgb("#2d3748"))[#it]
+    ]
+  }
+
+  show raw.where(block: true): it => {
+    block(
+      fill: config.gray-light,
+      stroke: 1.5pt + config.gray-dark.lighten(40%),
+      radius: config.code-radius.block,
+      inset: config.code-inset.block,
+      width: 100%,
+      above: config.block-spacing.above,
+      below: config.block-spacing.below,
+    )[
+      #set text(font: config.mono-font, size: config.code-size, fill: rgb("#2d3748"))
+      #it
+    ]
+  }
+  
+  // Apply other styles directly
+  show link: it => {
+    set text(fill: accent.lighten(10%))
+    underline(it)
+  }
+
+  show quote: it => {
+    block(
+      fill: config.gray-light,
+      stroke: (left: 4pt + accent),
+      radius: (right: 4pt),
+      inset: (x: 12pt, y: 8pt),
+    )[
+      #set text(style: "italic")
+      #it
+    ]
+  }
+
+  show figure: it => {
+    block(above: 1em, below: 1em)[
+      #align(center)[#it.body]
+      #if it.caption != none {
+        v(0.3em)
         align(center)[
-          #text(size: 9pt)[
-            #counter(page).display("i")
+          #text(size: 0.85em, weight: "semibold", fill: config.gray-dark)[
+            #it.supplement
+            #if it.numbering != none [
+              #[ ]#it.counter.display(it.numbering)
+            ]
+            #if it.caption != none [
+              #[: ]#it.caption
+            ]
           ]
         ]
-      },
-      numbering: "i",
-    )[
-      #outline(
-        title: [Table of Contents],
-        depth: 3,
-        indent: 1em,
-      )
+      }
     ]
+  }
+
+  show table: it => {
+    block(above: 1em, below: 1em)[
+      #align(center)[#it]
+    ]
+  }
+
+  show bibliography: it => {
+    pagebreak(weak: true)
+    set heading(numbering: none)
+    it
+  }
+  
+  // Apply list styles
+  set list(indent: 1em, spacing: config.list-spacing)
+  set enum(indent: 1em, spacing: config.list-spacing)
+
+  // Generate title and copyright pages
+  create_title_page(title, subtitle, authors, version, date, publisher, isbn, cover-image, config)
+  create_copyright_page(authors, date, isbn)
+  
+  // Generate table of contents if requested
+  if show-outline {
+    create_outline()
   }
 
   // Reset page numbering for main content
@@ -371,7 +429,57 @@
 
 // Specialized components for technical books
 
-// API reference component
+// Enhanced callout component with consistent styling
+#let callout(
+  type: "info",
+  title: "",
+  accent-color: default-config.accent-color,
+  content,
+) = {
+  let colors = (
+    info: (fill: rgb("#e1f5fe"), stroke: rgb("#0288d1")),
+    success: (fill: rgb("#e8f5e8"), stroke: rgb("#4caf50")),
+    warning: (fill: rgb("#fff3e0"), stroke: rgb("#ff9800")),
+    danger: (fill: rgb("#ffebee"), stroke: rgb("#f44336")),
+    note: (fill: rgb("#f3e5f5"), stroke: rgb("#9c27b0")),
+  )
+  
+  let color-scheme = colors.at(type, default: colors.info)
+  
+  block(
+    fill: color-scheme.fill,
+    stroke: (left: 4pt + color-scheme.stroke),
+    radius: (right: 4pt),
+    inset: (x: 12pt, y: 10pt),
+    width: 100%,
+    above: 1em,
+    below: 1em,
+  )[
+    #if title != "" {
+      text(weight: "bold", fill: color-scheme.stroke)[#title]
+      v(0.5em)
+    }
+    #content
+  ]
+}
+
+// Styled table component
+#let styled-table(
+  columns: 2,
+  stroke: 0.5pt + gray.lighten(40%),
+  fill: (white, rgb("#f8f9fa")),
+  ..content
+) = {
+  table(
+    columns: columns,
+    stroke: stroke,
+    fill: fill,
+    inset: 8pt,
+    ..content
+  )
+}
+
+// API reference component with enhanced styling
 #let api-reference(
   name: "",
   signature: "",
@@ -379,15 +487,18 @@
   parameters: (),
   returns: none,
   examples: (),
+  accent-color: default-config.accent-color,
 ) = {
   block(
-    fill: rgb("#f8f9fa"),
-    stroke: 1pt + rgb("#e9ecef"),
+    fill: default-config.gray-light,
+    stroke: 1pt + default-config.gray-medium,
     radius: 6pt,
     inset: 16pt,
     width: 100%,
+    above: 1em,
+    below: 1em,
   )[
-    #text(size: 14pt, weight: "bold")[#name]
+    #text(size: 14pt, weight: "bold", fill: rgb(accent-color))[#name]
     
     #if signature != "" {
       v(0.5em)
@@ -425,10 +536,11 @@
   ]
 }
 
-// Step-by-step tutorial component
+// Step-by-step tutorial component with theme integration
 #let tutorial-step(
   number: 1,
   title: "",
+  accent-color: default-config.accent-color,
   content,
 ) = {
   block(above: 1.5em, below: 1em)[
@@ -438,7 +550,7 @@
       [
         #circle(
           radius: 1.2em,
-          fill: rgb("#2563eb"),
+          fill: rgb(accent-color),
           text(fill: white, weight: "bold")[#number]
         )
       ],

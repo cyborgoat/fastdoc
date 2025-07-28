@@ -12,7 +12,7 @@
   version: "1.0.0",
   publisher: "Technical Publications",
   logo-path: "logo.jpg",
-  accent-color: "#2563eb",
+  accent-color: "#000000ff",
 )
 
 #pagebreak()
@@ -26,7 +26,7 @@
   date: datetime.today(),
   publisher: "Technical Publications",
   isbn: "978-0-123456-78-9",
-  accent-color: "#2563eb",
+  accent-color: "#0a3464ff",
   font: "New Computer Modern",
   paper: "a4",
   show-outline: true,

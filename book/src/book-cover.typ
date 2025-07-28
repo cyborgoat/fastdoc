@@ -7,7 +7,7 @@
   version: "",
   publisher: "",
   logo-path: none,
-  accent-color: "#2563eb",
+  accent-color: "#000000ff",
 ) = {
   set page(
     paper: "a4",
