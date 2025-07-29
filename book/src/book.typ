@@ -48,12 +48,26 @@
 // Helper functions for page components
 #let create_header() = context {
   if counter(page).get().first() > 1 {
-    let current-heading = query(selector(heading.where(level: 1)).before(here())).last()
-    align(center)[
-      #text(size: 8pt, style: "italic", fill: gray.darken(20%))[
-        #current-heading.body
+    // Find all chapter headings up to and including the current position
+    let all-headings = query(heading.where(level: 1))
+    let current-heading = none
+    
+    // Find the most recent chapter heading at or before current position
+    for heading in all-headings {
+      if heading.location().page() <= here().page() {
+        current-heading = heading
+      } else {
+        break
+      }
+    }
+    
+    if current-heading != none {
+      align(center)[
+        #text(size: 8pt, style: "italic", fill: gray.darken(20%))[
+          #current-heading.body
+        ]
       ]
-    ]
+    }
   }
 }
 
